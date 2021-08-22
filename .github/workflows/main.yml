@@ -25,6 +25,8 @@ jobs:
 
       - run: yarn install
 
+      - run: yarn test
+
       - run: CI=false yarn build
 
       - name: Deploy gh-pages
