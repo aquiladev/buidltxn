@@ -27,7 +27,7 @@ jobs:
 
       - run: yarn test
 
-      - run: CI=false yarn build
+      - run: CI=false REACT_APP_GITHUB_REF_SHA=${GITHUB_REF#refs/heads/}.${GITHUB_SHA::6} yarn build
 
       - name: Deploy gh-pages
         uses: peaceiris/actions-gh-pages@v3

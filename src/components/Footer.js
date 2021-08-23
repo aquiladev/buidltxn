@@ -6,6 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Link from '@material-ui/core/Link';
 import IconButton from '@material-ui/core/IconButton';
 import GitHubIcon from '@material-ui/icons/GitHub';
+import Chip from '@material-ui/core/Chip';
 
 const useStyles = makeStyles(() => ({
   footer: {
@@ -30,6 +31,9 @@ export default function Footer() {
             <GitHubIcon fontSize='default' />
           </IconButton>
         </Link>
+        {process.env.REACT_APP_GITHUB_REF_SHA &&
+          <Chip label={process.env.REACT_APP_GITHUB_REF_SHA} variant='outlined' />
+        }
       </Toolbar>
     </AppBar>
   );
