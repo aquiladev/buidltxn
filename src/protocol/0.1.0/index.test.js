@@ -201,7 +201,7 @@ describe.each([
     },
     error: 'should be equal to one of the allowed values'
   },
-])('shouls fail', ({data, error}) => {
+])('should fail validation', ({data, error}) => {
   test(`${JSON.stringify(data)}`, () => {
     const {valid, errors} = protocol.validate(data);
     expect(valid).toBe(false);
@@ -210,7 +210,7 @@ describe.each([
   });
 });
 
-test('should successed', () => {
+test('should validate successfully', () => {
   const data = {
     protocol: 'buidltxn',
     version: '0.1.0',
@@ -224,4 +224,23 @@ test('should successed', () => {
   };
   const {valid} = protocol.validate(data);
   expect(valid).toBe(true);
+})
+
+test('should build data', () => {
+  const data = protocol.build(
+    '0xf10326c1c6884b094e03d616cc8c7b920e3f73e0',
+    {inputs: [], name: '', outputs: [], stateMutability: '', type: 'function'},
+    {to: '0xf10326c1c6884b094e03d616cc8c7b920e3f73e0', data: '0x11'}
+  );
+  expect(data).toBeDefined();
+})
+
+test('should fail building data', () => {
+  expect(() => {
+    protocol.build(
+      '',
+      {inputs: [], name: '', outputs: [], stateMutability: '', type: 'function'},
+      {to: '0xf10326c1c6884b094e03d616cc8c7b920e3f73e0', data: '0x11'}
+    )
+  }).toThrow('should match pattern "^0x[a-fA-F0-9]{40}$"');
 })
