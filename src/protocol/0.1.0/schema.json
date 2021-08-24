@@ -58,6 +58,12 @@
         },
         "type": {
           "enum": ["function"]
+        },
+        "constant": {
+          "type": "boolean"
+        },
+        "payable": {
+          "type": "boolean"
         }
       },
       "required": ["inputs", "name", "outputs", "stateMutability", "type"],

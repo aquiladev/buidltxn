@@ -28,15 +28,15 @@ export default function FunctionFragmentForm({ abi, onUpdate }) {
       Object.values(iface.functions)
         .filter(fragment => !fragment.constant)
         .map(fragment => {
-          const uniqueName = `${fragment.name}(${fragment.inputs.map(x => `${x.type}`).join(',')})`;
-          const sigHash = iface.getSighash(uniqueName)
-          return {...fragment, uniqueName, sigHash };
+          const selector = `${fragment.name}(${fragment.inputs.map(x => `${x.type}`).join(',')})`;
+          const sigHash = iface.getSighash(selector)
+          return {...fragment, selector, sigHash };
         })
     );
   }, [abi])
 
   const renderFragment = (selector) => {
-    const fragment = funcs.find(x => x.uniqueName === selector);
+    const fragment = funcs.find(x => x.selector === selector);
     return (
       <>
         {fragment.inputs.length > 0 && fragment.inputs.map((input, i) => {
@@ -95,7 +95,8 @@ export default function FunctionFragmentForm({ abi, onUpdate }) {
         fullWidth
         select>
         {funcs.map(x => {
-          return <MenuItem value={x.uniqueName}>{x.uniqueName} - {x.sigHash}</MenuItem>
+          // return <MenuItem value={x.selector}>{x.selector} - {x.sigHash}</MenuItem>
+          return <MenuItem value={x.selector}>{x.selector}</MenuItem>
         })}
       </TextField>
       {func.selector && renderFragment(func.selector)}
