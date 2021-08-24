@@ -13,16 +13,20 @@ import CallMadeIcon from '@material-ui/icons/CallMade';
 import SendIcon from '@material-ui/icons/Send';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import ShareIcon from '@material-ui/icons/Share';
-
+import CopyIcon from '@material-ui/icons/FileCopy';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import StepContent from '@material-ui/core/StepContent';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { ethers } from 'ethers';
 
+import { composeFunctions } from './../utils/abi';
 import { ETHERSCAN_API_MAP } from './../utils/constants';
+import ProtocolsManager from './../protocol';
 import FunctionFragmentForm from './FunctionFragmentForm';
+import ContentModal from './ContentModal';
 
 const useStyles = makeStyles((theme) => ({
   stepper: {
@@ -53,13 +57,17 @@ const useStyles = makeStyles((theme) => ({
   },
   btn: {
     marginRight: 8,
+  },
+  jsonFooter: {
+    padding: 20,
+    textAlign: 'center'
   }
 }));
 
 export default function TxnBuilder({mode}) {
   const classes = useStyles();
 
-  const { library, chainId, active } = useWeb3React();
+  const { library, account, chainId, active } = useWeb3React();
 
   const [address, setAddress] = useState({
     value: '',
@@ -71,6 +79,7 @@ export default function TxnBuilder({mode}) {
 
   const [contract, setContract] = useState({
     abi: undefined,
+    functions: undefined,
     error: undefined,
     isLoading: false,
   });
@@ -78,15 +87,19 @@ export default function TxnBuilder({mode}) {
   const [func, setFunc] = useState({
     selector: undefined,
     params: [],
+    functions: undefined,
     error: undefined,
     result: undefined,
   });
+
+  const [shareJson, setShareJson] = useState(undefined);
 
   const loadContract = async (address) => {
     const baseUri = ETHERSCAN_API_MAP[chainId];
     if(!baseUri) {
       setContract({
         abi: undefined,
+        functions: undefined,
         error: 'Etherscan does not support the network',
         isLoading: false,
       });
@@ -99,12 +112,15 @@ export default function TxnBuilder({mode}) {
         if(message === 'NOTOK') {
           setContract({
             abi: undefined,
+            functions: undefined,
             error: result,
             isLoading: false,
           });
         } else {
+          const abi = JSON.parse(result);
           setContract({
-            abi: JSON.parse(result),
+            abi,
+            functions: composeFunctions(abi),
             error: undefined,
             isLoading: false,
           });
@@ -113,6 +129,7 @@ export default function TxnBuilder({mode}) {
       .catch(error => {
         setContract({
           abi: undefined,
+          functions: undefined,
           error: error,
           isLoading: false,
         });
@@ -147,6 +164,24 @@ export default function TxnBuilder({mode}) {
     {
       const res = await cntrct.functions[func.selector](...func.params);
       setFunc({...func, error: undefined, result: res.toString()});
+    } catch(err) {
+      setFunc({...func, error: err, result: undefined});
+    }
+  }
+
+  const share = () => {
+    try {
+      const protocol = ProtocolsManager.getProtocol();
+      const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
+      const data = protocol.build(
+        account,
+        contract.functions[func.selector],
+        {
+          to: address.value,
+          data: cntrct.interface.encodeFunctionData(func.selector, func.params)
+        }
+      );
+      setShareJson(data);
     } catch(err) {
       setFunc({...func, error: err, result: undefined});
     }
@@ -192,6 +227,7 @@ export default function TxnBuilder({mode}) {
                     if(code !== '0x') {
                       setContract({
                         abi: undefined,
+                        functions: undefined,
                         isLoading: true,
                       });
 
@@ -284,7 +320,36 @@ export default function TxnBuilder({mode}) {
             >
               Send
             </Button>
-            {/* <Button color='primary' variant='contained' className={classes.btn} startIcon={<ShareIcon />} disabled>Share</Button> */}
+            <Button
+             color='primary'
+             variant='contained'
+             className={classes.btn}
+             startIcon={<ShareIcon />}
+             onClick={share}
+             disabled={!active}
+            >
+              Share
+            </Button>
+            <ContentModal
+              isOpen={shareJson}
+              onClose={() => setShareJson() }
+              title='Transaction data'
+              content={
+                <>
+                  <pre>{JSON.stringify(shareJson, null, 2)}</pre>
+                  <div className={classes.jsonFooter}>
+                    <CopyToClipboard text={JSON.stringify(shareJson)}>
+                      <Button
+                        color='primary'
+                        className={classes.btn}
+                        startIcon={<CopyIcon />}
+                        >
+                        Copy
+                      </Button>
+                    </CopyToClipboard>
+                  </div>
+                </>
+              } />
             {func.error &&
               <Alert severity='error' className={classes.alert}>
                 {func.error.message}
