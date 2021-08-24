@@ -170,17 +170,21 @@ export default function TxnBuilder({mode}) {
   }
 
   const share = () => {
-    const protocol = ProtocolsManager.getProtocol();
-    const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
-    const data = protocol.build(
-      account,
-      contract.functions[func.selector],
-      {
-        to: address.value,
-        data: cntrct.interface.encodeFunctionData(func.selector, func.params)
-      }
-    );
-    setShareJson(data)
+    try {
+      const protocol = ProtocolsManager.getProtocol();
+      const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
+      const data = protocol.build(
+        account,
+        contract.functions[func.selector],
+        {
+          to: address.value,
+          data: cntrct.interface.encodeFunctionData(func.selector, func.params)
+        }
+      );
+      setShareJson(data);
+    } catch(err) {
+      setFunc({...func, error: err, result: undefined});
+    }
   }
 
   return (
