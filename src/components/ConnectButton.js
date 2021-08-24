@@ -106,7 +106,7 @@ export default function ConnectButton() {
       >
         Connect to a wallet
       </Button>
-      <ConnectModal isOpen={connect} onClose={() => setConnect(false) } />
+      <ConnectModal isOpen={!!connect} onClose={() => setConnect(false) } />
     </>
   );
 }

@@ -21,14 +21,14 @@ export default function Footer() {
 
   return (
     <AppBar position='static' className={classes.footer}>
-      <Typography variant='body1'>Sometimes transactions are difficult, Buidltxn aims to help building transactions.</Typography>
+      <Typography variant='body1'>Sometimes transactions are difficult, Buidltxn helps building transactions.</Typography>
 
       {/* <Typography variant='body1'>Imagine you need to explain somebody to execute transaction through Etherscan with list of parameters.</Typography>
       <Typography variant='body1'>Buidltxn allows to build and share transaction with anybody.</Typography> */}
       <Toolbar>
         <Link href='//github.com/aquiladev/buidltxn' target='_blank' rel='noopener'>
           <IconButton color='default' aria-label='GitHub repo' component='span'>
-            <GitHubIcon fontSize='default' />
+            <GitHubIcon fontSize='medium' />
           </IconButton>
         </Link>
         {process.env.REACT_APP_GITHUB_REF_SHA &&

@@ -14,4 +14,5 @@ class ProtocolsManager {
   }
 }
 
-module.exports = new ProtocolsManager();
+const protocolsManager = new ProtocolsManager();
+export default protocolsManager;
