@@ -1,4 +1,4 @@
-const protocol = require('./index');
+import protocol from './index';
 
 describe.each([
   {data: {}, error: 'should have required property \'protocol\''},

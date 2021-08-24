@@ -1,6 +1,6 @@
-const Ajv = require('ajv');
+import Ajv from 'ajv';
 
-const schema = require('./schema.json');
+import schema from './schema.json';
 
 class Protocol {
   name = 'buidltxn'
@@ -31,4 +31,5 @@ class Protocol {
   }
 }
 
-module.exports = new Protocol();
+const protocol = new Protocol();
+export default protocol;

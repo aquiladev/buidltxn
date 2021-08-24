@@ -1,4 +1,4 @@
-const protocol_0_1_0 = require('./0.1.0');
+import protocol_0_1_0 from './0.1.0';
 
 class ProtocolsManager {
   protocols = [
