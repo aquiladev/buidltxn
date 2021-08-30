@@ -2,6 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import { Link } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
@@ -18,6 +19,9 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 8,
   },
   title: {
+    color: 'inherit',
+    textDecoration: 'none',
+    display: 'flex',
     fontSize: '1rem',
     [theme.breakpoints.up('sm')]: {
       fontSize: '1.5rem',
@@ -36,10 +40,12 @@ export default function Header({changeMode}) {
     <header>
       <AppBar position='fixed' className={classes.header}>
         <Toolbar>
-          <img src="logo.png" alt="logo" className={classes.logo} />
-          <Typography className={classes.title} variant='h5' noWrap>
-            Buidltxn
-          </Typography>
+          <Link to='/' className={classes.title}>
+            <img src="logo.png" alt="logo" className={classes.logo} />
+            <Typography variant='h5' noWrap>
+              Buidltxn
+            </Typography>
+          </Link>
           <div className={classes.grow}></div>
           {/* <FormControlLabel
             value='advanced'

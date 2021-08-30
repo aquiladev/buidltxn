@@ -281,87 +281,91 @@ export default function TxnBuilder({mode}) {
             }
           </StepContent>
         </Step>
-        <Step expanded={contract.abi}>
-          <StepLabel>Transaction</StepLabel>
-          <StepContent>
-            {contract.abi && <FunctionFragmentForm abi={contract.abi} onUpdate={(data) => { setFunc(data) }}/>}
-          </StepContent>
-        </Step>
-        <Step expanded={func.selector}>
-          <StepLabel>Actions</StepLabel>
-          <StepContent>
-            <Button
-              color='primary'
-              variant='contained'
-              className={classes.btn}
-              startIcon={<CallMadeIcon />}
-              onClick={call}
-              disabled={!active}
-            >
-              Call
-            </Button>
-            <Button
-              color='primary'
-              variant='contained'
-              className={classes.btn}
-              startIcon={<MonetizationOnIcon />}
-              onClick={estimate}
-              disabled={!active}
-            >
-              Estimate
-            </Button>
-            <Button
-              color='primary'
-              variant='contained'
-              className={classes.btn}
-              startIcon={<SendIcon />}
-              onClick={send}
-              disabled={!active}
-            >
-              Send
-            </Button>
-            <Button
-             color='primary'
-             variant='contained'
-             className={classes.btn}
-             startIcon={<ShareIcon />}
-             onClick={share}
-             disabled={!active}
-            >
-              Share
-            </Button>
-            <ContentModal
-              isOpen={shareJson}
-              onClose={() => setShareJson() }
-              title='Transaction data'
-              content={
-                <>
-                  <pre>{JSON.stringify(shareJson, null, 2)}</pre>
-                  <div className={classes.jsonFooter}>
-                    <CopyToClipboard text={JSON.stringify(shareJson)}>
-                      <Button
-                        color='primary'
-                        className={classes.btn}
-                        startIcon={<CopyIcon />}
-                        >
-                        Copy
-                      </Button>
-                    </CopyToClipboard>
-                  </div>
-                </>
-              } />
-            {func.error &&
-              <Alert severity='error' className={classes.alert}>
-                {func.error.message}
-              </Alert>
-            }
-            {func.result &&
-              <Alert severity='info' className={classes.alert}>
-                Result: {func.result}
-              </Alert>
-            }
-          </StepContent>
-        </Step>
+        {contract.abi &&
+          <Step expanded>
+            <StepLabel>Transaction</StepLabel>
+            <StepContent>
+              <FunctionFragmentForm abi={contract.abi} onUpdate={(data) => { setFunc(data) }}/>
+            </StepContent>
+          </Step>
+        }
+        {func.selector &&
+          <Step expanded>
+            <StepLabel>Actions</StepLabel>
+            <StepContent>
+              <Button
+                color='primary'
+                variant='contained'
+                className={classes.btn}
+                startIcon={<CallMadeIcon />}
+                onClick={call}
+                disabled={!active}
+              >
+                Call
+              </Button>
+              <Button
+                color='primary'
+                variant='contained'
+                className={classes.btn}
+                startIcon={<MonetizationOnIcon />}
+                onClick={estimate}
+                disabled={!active}
+              >
+                Estimate
+              </Button>
+              <Button
+                color='primary'
+                variant='contained'
+                className={classes.btn}
+                startIcon={<SendIcon />}
+                onClick={send}
+                disabled={!active}
+              >
+                Send
+              </Button>
+              <Button
+                color='primary'
+                variant='contained'
+                className={classes.btn}
+                startIcon={<ShareIcon />}
+                onClick={share}
+                disabled={!active}
+              >
+                Share
+              </Button>
+              <ContentModal
+                isOpen={shareJson}
+                onClose={() => setShareJson() }
+                title='Transaction data'
+                content={
+                  <>
+                    <pre>{JSON.stringify(shareJson, null, 2)}</pre>
+                    <div className={classes.jsonFooter}>
+                      <CopyToClipboard text={JSON.stringify(shareJson, null, 2)}>
+                        <Button
+                          color='primary'
+                          className={classes.btn}
+                          startIcon={<CopyIcon />}
+                          >
+                          Copy
+                        </Button>
+                      </CopyToClipboard>
+                    </div>
+                  </>
+                } />
+              {func.error &&
+                <Alert severity='error' className={classes.alert}>
+                  {func.error.message}
+                </Alert>
+              }
+              {func.result &&
+                <Alert severity='info' className={classes.alert}>
+                  Result: {func.result}
+                </Alert>
+              }
+            </StepContent>
+          </Step>
+        }
       </Stepper>
     </>
   );
