@@ -5,11 +5,9 @@ import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 
 import TxnForm from './TxnForm';
+import TxnActions from './TxnActions';
 
 const useStyles = makeStyles((theme) => ({
-  stepper: {
-    padding: 0,
-  },
   form: {
     display: 'flex',
     [theme.breakpoints.down('sm')]: {
@@ -19,27 +17,12 @@ const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
   },
-  label: {
-    marginTop: 4,
-    marginLeft: 8
-  },
-  divider: {
-    marginTop: 14,
-    marginBottom: 14,
-  },
-  abi_loading: {
-    marginLeft: 8
-  },
   alert: {
     marginTop: 8,
   },
-  btn: {
-    marginRight: 8,
+  inputForm: {
+    marginTop: 10
   },
-  jsonFooter: {
-    padding: 20,
-    textAlign: 'center'
-  }
 }));
 
 export default function JsonTxn() {
@@ -74,16 +57,22 @@ export default function JsonTxn() {
           }}
         />
       </Grid>
-      {txn.value && 
-        <TxnForm txn={txn.value} readOnly onComplete={
-          (res, error) => {
-            setTxn({
-              ...txn,
-              result: JSON.stringify(res, null, 2),
-              error: error && error.message,
-            })
-          }
-        } />}
+      {txn.value &&
+        <>
+          <TxnForm txn={txn.value} readOnly />
+          <Grid className={classes.inputForm}>
+            <TxnActions txn={txn.value} onComplete={
+              (res, err) => {
+                setTxn({
+                  ...txn,
+                  result: JSON.stringify(res, null, 2),
+                  error: err && err.message,
+                });
+              }
+            } />
+          </Grid>
+        </>
+      }
       {txn.error &&
         <Alert severity='error' className={classes.alert}>
           {txn.error}

@@ -6,13 +6,15 @@ import CallMadeIcon from '@material-ui/icons/CallMade';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import SendIcon from '@material-ui/icons/Send';
 
+import TxnShareButton from './TxnShareButton';
+
 const useStyles = makeStyles((theme) => ({
   btn: {
     marginRight: 8,
   },
 }));
 
-export default function TxnActions({txn, onComplete}) {
+export default function TxnActions({txn, onComplete, allowShare}) {
   const classes = useStyles();
 
   const { library, active } = useWeb3React();
@@ -72,6 +74,7 @@ export default function TxnActions({txn, onComplete}) {
       >
         Send
       </Button>
+      {allowShare && <TxnShareButton txn={txn} />}
     </>
   );
 }

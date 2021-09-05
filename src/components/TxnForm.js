@@ -5,7 +5,6 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
 import FunctionFragmentForm from './FunctionFragmentForm';
-import TxnActions from './TxnActions';
 
 const useStyles = makeStyles((theme) => ({
   inputForm: {
@@ -13,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function TxnForm({txn, readOnly, onComplete}) {
+export default function TxnForm({txn, readOnly}) {
   const classes = useStyles();
 
   const {fragment, transaction} = txn;
@@ -37,9 +36,6 @@ export default function TxnForm({txn, readOnly, onComplete}) {
       </Grid>
       <Grid className={classes.inputForm}>
         <FunctionFragmentForm fragment={txn.fragment} params={Array.from(params)} readOnly />
-      </Grid>
-      <Grid className={classes.inputForm}>
-        <TxnActions txn={txn} onComplete={onComplete} />
       </Grid>
     </>
   );
