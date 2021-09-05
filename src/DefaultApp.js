@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from 'react-router-dom';
 import { Web3ReactProvider, useWeb3React, UnsupportedChainIdError } from '@web3-react/core';
 import {
   NoEthereumProviderError,
@@ -17,6 +22,7 @@ import Paper from '@material-ui/core/Paper';
 
 import { useEagerConnect, useInactiveListener } from './hooks';
 import Header from './components/Header';
+import JsonTxn from './components/JsonTxn';
 import TxnBuilder from './components/TxnBuilder';
 import Footer from './components/Footer';
 
@@ -110,27 +116,36 @@ function DefaultApp() {
   useInactiveListener(!triedEager || !!activatingConnector);
 
   return (
-    <ThemeProvider theme={theme}>
-      <div className={classes.root}>
-        <Header changeMode={setMode} />
-        <Container maxWidth={mode === 'basic' ? 'sm' : 'md'} className={classes.content}>
-          {
-            !!error &&
-            <Alert
-              variant='filled'
-              severity='error'
-              style={{ position: 'fixed', zIndex: 1200, bottom: 10, left: 10 }}
-            >
-              {getErrorMessage(error)}
-            </Alert>
-          }
-          <Paper elevation={3} className={classes.paper}>
-            <TxnBuilder mode={mode} />
-          </Paper>
-        </Container>
-        <Footer />
-      </div>
-    </ThemeProvider>
+    <Router>
+      <ThemeProvider theme={theme}>
+        <div className={classes.root}>
+          <Header changeMode={setMode} />
+          <Container maxWidth={mode === 'basic' ? 'sm' : 'md'} className={classes.content}>
+            {
+              !!error &&
+              <Alert
+                variant='filled'
+                severity='error'
+                style={{ position: 'fixed', zIndex: 1200, bottom: 10, left: 10 }}
+              >
+                {getErrorMessage(error)}
+              </Alert>
+            }
+            <Paper elevation={3} className={classes.paper}>
+              <Switch>
+                <Route path="/json">
+                  <JsonTxn />
+                </Route>
+                <Route path="/">
+                  <TxnBuilder mode={mode} />
+                </Route>
+              </Switch>
+            </Paper>
+          </Container>
+          <Footer />
+        </div>
+      </ThemeProvider>
+    </Router>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useWeb3React } from '@web3-react/core';
 import Grid from '@material-ui/core/Grid';
@@ -8,17 +8,10 @@ import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import Alert from '@material-ui/lab/Alert';
-import Button from '@material-ui/core/Button';
-import CallMadeIcon from '@material-ui/icons/CallMade';
-import SendIcon from '@material-ui/icons/Send';
-import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
-import ShareIcon from '@material-ui/icons/Share';
-import CopyIcon from '@material-ui/icons/FileCopy';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import StepContent from '@material-ui/core/StepContent';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { ethers } from 'ethers';
 
@@ -26,7 +19,7 @@ import { composeFunctions } from './../utils/abi';
 import { ETHERSCAN_API_MAP } from './../utils/constants';
 import ProtocolsManager from './../protocol';
 import FunctionFragmentForm from './FunctionFragmentForm';
-import ContentModal from './ContentModal';
+import TxnActions from './TxnActions';
 
 const useStyles = makeStyles((theme) => ({
   stepper: {
@@ -66,7 +59,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function TxnBuilder({mode}) {
   const classes = useStyles();
-
   const { library, account, chainId, active } = useWeb3React();
 
   const [address, setAddress] = useState({
@@ -87,12 +79,11 @@ export default function TxnBuilder({mode}) {
   const [func, setFunc] = useState({
     selector: undefined,
     params: [],
+    txn: undefined,
     functions: undefined,
     error: undefined,
     result: undefined,
   });
-
-  const [shareJson, setShareJson] = useState(undefined);
 
   const loadContract = async (address) => {
     const baseUri = ETHERSCAN_API_MAP[chainId];
@@ -136,54 +127,26 @@ export default function TxnBuilder({mode}) {
       });
   }
 
-  const call = async () => {
-    const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
-    try
-    {
-      const res = await cntrct.callStatic[func.selector](...func.params);
-      setFunc({...func, error: undefined, result: JSON.stringify(res)});
-    } catch(err) {
-      setFunc({...func, error: err, result: undefined});
-    }
-  }
-
-  const estimate = async () => {
-    const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
-    try
-    {
-      const res = await cntrct.estimateGas[func.selector](...func.params);
-      setFunc({...func, error: undefined, result: res.toString()});
-    } catch(err) {
-      setFunc({...func, error: err, result: undefined});
-    }
-  }
-
-  const send = async () => {
-    const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
-    try
-    {
-      const res = await cntrct.functions[func.selector](...func.params);
-      setFunc({...func, error: undefined, result: res.toString()});
-    } catch(err) {
-      setFunc({...func, error: err, result: undefined});
-    }
-  }
-
-  const share = () => {
+  const buildTxn = (data) => {
     try {
       const protocol = ProtocolsManager.getProtocol();
       const cntrct = new ethers.Contract(address.value, contract.abi, library.getSigner());
-      const data = protocol.build(
+      const _txn = protocol.build(
         account,
-        contract.functions[func.selector],
+        contract.functions[data.selector],
         {
           to: address.value,
-          data: cntrct.interface.encodeFunctionData(func.selector, func.params)
+          data: cntrct.interface.encodeFunctionData(data.selector, data.params)
         }
       );
-      setShareJson(data);
+      setFunc({...data, txn: _txn});
     } catch(err) {
-      setFunc({...func, error: err, result: undefined});
+      setFunc({
+        ...func,
+        txn: undefined,
+        error: err && err.message,
+        result: undefined
+      });
     }
   }
 
@@ -270,8 +233,8 @@ export default function TxnBuilder({mode}) {
                         color='primary'
                         defaultValue={JSON.stringify(contract.abi, null, ' ')}
                         disabled
-                        multiline
                         fullWidth
+                        multiline
                         maxRows={5}
                       />
                     }
@@ -281,87 +244,40 @@ export default function TxnBuilder({mode}) {
             }
           </StepContent>
         </Step>
-        <Step expanded={contract.abi}>
-          <StepLabel>Transaction</StepLabel>
-          <StepContent>
-            {contract.abi && <FunctionFragmentForm abi={contract.abi} onUpdate={(data) => { setFunc(data) }}/>}
-          </StepContent>
-        </Step>
-        <Step expanded={func.selector}>
-          <StepLabel>Actions</StepLabel>
-          <StepContent>
-            <Button
-              color='primary'
-              variant='contained'
-              className={classes.btn}
-              startIcon={<CallMadeIcon />}
-              onClick={call}
-              disabled={!active}
-            >
-              Call
-            </Button>
-            <Button
-              color='primary'
-              variant='contained'
-              className={classes.btn}
-              startIcon={<MonetizationOnIcon />}
-              onClick={estimate}
-              disabled={!active}
-            >
-              Estimate
-            </Button>
-            <Button
-              color='primary'
-              variant='contained'
-              className={classes.btn}
-              startIcon={<SendIcon />}
-              onClick={send}
-              disabled={!active}
-            >
-              Send
-            </Button>
-            <Button
-             color='primary'
-             variant='contained'
-             className={classes.btn}
-             startIcon={<ShareIcon />}
-             onClick={share}
-             disabled={!active}
-            >
-              Share
-            </Button>
-            <ContentModal
-              isOpen={shareJson}
-              onClose={() => setShareJson() }
-              title='Transaction data'
-              content={
-                <>
-                  <pre>{JSON.stringify(shareJson, null, 2)}</pre>
-                  <div className={classes.jsonFooter}>
-                    <CopyToClipboard text={JSON.stringify(shareJson)}>
-                      <Button
-                        color='primary'
-                        className={classes.btn}
-                        startIcon={<CopyIcon />}
-                        >
-                        Copy
-                      </Button>
-                    </CopyToClipboard>
-                  </div>
-                </>
+        {contract.abi &&
+          <Step expanded>
+            <StepLabel>Transaction</StepLabel>
+            <StepContent>
+              <FunctionFragmentForm abi={contract.abi} onUpdate={buildTxn} />
+            </StepContent>
+          </Step>
+        }
+        {func.txn &&
+          <Step expanded>
+            <StepLabel>Actions</StepLabel>
+            <StepContent>
+              <TxnActions txn={func.txn} allowShare onComplete={
+                (res, err) => {
+                  setFunc({
+                    ...func,
+                    result: res && JSON.stringify(res, null, 2),
+                    error: err && err.message,
+                  });
+                }
               } />
-            {func.error &&
-              <Alert severity='error' className={classes.alert}>
-                {func.error.message}
-              </Alert>
-            }
-            {func.result &&
-              <Alert severity='info' className={classes.alert}>
-                Result: {func.result}
-              </Alert>
-            }
-          </StepContent>
-        </Step>
+              {func.error &&
+                <Alert severity='error' className={classes.alert}>
+                  {func.error}
+                </Alert>
+              }
+              {func.result &&
+                <Alert severity='info' className={classes.alert}>
+                  Result: {func.result}
+                </Alert>
+              }
+            </StepContent>
+          </Step>
+        }
       </Stepper>
     </>
   );
