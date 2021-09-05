@@ -12,7 +12,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export default function FunctionFragmentForm({ abi, onUpdate }) {
+export default function FunctionFragmentForm({ abi, fragment, params = [], onUpdate, readOnly }) {
   const classes = useStyles();
 
   const [funcs, setFuncs] = useState([]);
@@ -23,25 +23,29 @@ export default function FunctionFragmentForm({ abi, onUpdate }) {
   });
 
   useEffect(() => {
-    const iface = new ethers.utils.Interface(abi);
+    const iface = new ethers.utils.Interface(abi || [fragment]);
     setFuncs(
       Object.values(iface.functions)
-        .filter(fragment => !fragment.constant)
-        .map(fragment => {
-          const selector = `${fragment.name}(${fragment.inputs.map(x => `${x.type}`).join(',')})`;
+        .filter(fr => !fr.constant)
+        .map(fr => {
+          const selector = `${fr.name}(${fr.inputs.map(x => `${x.type}`).join(',')})`;
           const sigHash = iface.getSighash(selector)
-          return {...fragment, selector, sigHash };
+          return {...fr, selector, sigHash };
         })
     );
-  }, [abi])
+    if(fragment) {
+      const selector = `${fragment.name}(${fragment.inputs.map(x => `${x.type}`).join(',')})`;
+      setFunc({selector, params});
+    }
+  }, [abi, fragment])
 
   const renderFragment = (selector) => {
-    const fragment = funcs.find(x => x.selector === selector);
+    const fr = funcs.find(x => x.selector === selector);
     return (
       <>
-        {fragment.inputs.length > 0 && fragment.inputs.map((input, i) => {
+        {fr.inputs.length > 0 && fr.inputs.map((input, i) => {
           return (
-            <Grid className={classes.inputForm} key={`${fragment.sigHash}_${i}`}>
+            <Grid className={classes.inputForm} key={`${fr.sigHash}_${i}`}>
               <TextField
                 label={`${input.name} (${input.type})`}
                 variant='outlined'
@@ -51,6 +55,7 @@ export default function FunctionFragmentForm({ abi, onUpdate }) {
                 value={func.params[i]}
                 placeholder={input.type}
                 fullWidth
+                disabled={readOnly}
                 onChange={(event) => {
                   const {selector, params} = func;
                   params[i] = event.target.value;
@@ -79,6 +84,8 @@ export default function FunctionFragmentForm({ abi, onUpdate }) {
         size='small'
         variant='outlined'
         defaultValue={func.selector}
+        value={func.selector}
+        disabled={readOnly}
         onChange={(event) => {
           setFunc({
             selector: event.target.value,
@@ -96,7 +103,7 @@ export default function FunctionFragmentForm({ abi, onUpdate }) {
         select>
         {funcs.map(x => {
           // return <MenuItem value={x.selector}>{x.selector} - {x.sigHash}</MenuItem>
-          return <MenuItem value={x.selector}>{x.selector}</MenuItem>
+          return <MenuItem value={x.selector} key={x.selector}>{x.selector}</MenuItem>
         })}
       </TextField>
       {func.selector && renderFragment(func.selector)}

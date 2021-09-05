@@ -270,8 +270,8 @@ export default function TxnBuilder({mode}) {
                         color='primary'
                         defaultValue={JSON.stringify(contract.abi, null, ' ')}
                         disabled
-                        multiline
                         fullWidth
+                        multiline
                         maxRows={5}
                       />
                     }

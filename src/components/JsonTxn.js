@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { useWeb3React } from '@web3-react/core';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
+
+import TxnForm from './TxnForm';
 
 const useStyles = makeStyles((theme) => ({
   stepper: {
@@ -46,6 +47,7 @@ export default function JsonTxn() {
 
   const [txn, setTxn] = useState({
     value: undefined,
+    result: undefined,
     error: undefined,
   });
 
@@ -60,20 +62,36 @@ export default function JsonTxn() {
           className={classes.grow}
           fullWidth
           multiline
+          maxRows={5}
           onChange={(event) => {
             const { value } = event.target;
             try {
               const data = JSON.parse(value);
-              setTxn({value: data, error: undefined});
+              setTxn({value: data, result: undefined, error: undefined});
             } catch (err) {
-              setTxn({value: undefined, error: err.message});
+              setTxn({value: undefined, result: undefined, error: err.message});
             }
           }}
         />
       </Grid>
+      {txn.value && 
+        <TxnForm txn={txn.value} readOnly onComplete={
+          (res, error) => {
+            setTxn({
+              ...txn,
+              result: JSON.stringify(res, null, 2),
+              error: error && error.message,
+            })
+          }
+        } />}
       {txn.error &&
         <Alert severity='error' className={classes.alert}>
           {txn.error}
+        </Alert>
+      }
+      {txn.result &&
+        <Alert severity='info' className={classes.alert}>
+          Result: {txn.result}
         </Alert>
       }
     </>
